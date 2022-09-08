@@ -1,13 +1,30 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { CronJob } from 'cron'
-const wateringTime = ref(4)
+ import axios from 'axios'
+ import {dayjs} from 'dayjs'
+ import {relativeTime} from 'dayjs/plugin/relativeTime'
+
+const cronTimeParser = (ct) => {
+    const intervalDictionary = { 1: "minut", 2: "timme", 3: "dag" }
+    if (ct.includes('/')) {
+        const intervalArray = ct.split(' ')
+        for (let i in intervalArray) {
+            if (intervalArray[i].includes('/')) {
+                const timeInterval = intervalArray[i].split('/')[1]
+                return { interval: intervalDictionary[i], time: timeInterval }
+            }
+        }
+    }
+}
+
 const fanSpeed = ref(50)
-const frequencies = ['dag', 'timme', 'minut']
-const cronString = ref('*/10 * * * * *')
-const userCronString = ref(cronString.value)
+const frequencies = ['minut', 'timme', 'dag']
+const cronTime = ref("0 */2 * * * *")
+const userTime = ref(cronTimeParser(cronTime.value).time)
+const userInterval = ref(cronTimeParser(cronTime.value).interval)
 const job = new CronJob(
-    cronString.value,
+    cronTime.value,
     function () {
         console.log('You will see this message every second');
     },
@@ -15,41 +32,48 @@ const job = new CronJob(
     true,
     'Europe/Stockholm'
 );
-const lastDate = () => {
-    console.log(job.lastDate())
+
+const generateCronTime = (time, interval) => {
+    switch (interval) {
+        case 'minut':
+            return `0 */${time} * * * *`
+        case 'timme':
+            return `0 0 */${time} * * *`
+        case 'dag':
+            return `0 0 0 */${time} * *`
+    }
 }
-const nextDates = () => {
-    console.log(job.nextDates())
+
+const parseCronTime = () => {
+    console.log(cronTimeParser(cronTime.value))
 }
+
+const logNextDates = () => {
+    console.log(job.nextDates().c)
+    const { year, month, day, hour, minute,second } = job.nextDates().c
+     dayjs.extend(relativeTime)
+    print(dayjs(year, month, day, hour, minute, second).fromNow())
+}
+
+const callApi = async () => {
+     try {
+        const resp = await axios.get('https://api.simsva.se/wexteras/data?id=1');
+        console.log(resp.data);
+    } catch (err) {
+        // Handle Error Here
+        console.error(err);
+    }
+}
+onMounted(() => {
+    dayjs.extend(relativeTime)
+ })
+
 </script>
 
 <template>
     <div class="min-h-screen w-full">
         <div class="flex justify-center">
             <input type="checkbox" id="my-modal" class="modal-toggle" />
-            <div class="modal">
-                <div class="modal-box">
-                    <h3 class="font-bold text-lg">Hur ofta vill du vattna?</h3>
-                    <div class="form-control">
-                        <div class="input-group">
-                            <span>Var</span>
-                            <input type="text" placeholder="10" class="input input-bordered" />
-                            <span>:e</span>
-                            <select v-model="frequency" class="select select-bordered">
-                                <option v-for="f in frequencies" v-bind:value="f">
-                                    {{f}}
-                                </option>
-                            </select>
-                        </div>
-                    </div>
-                    <p>{{cronString}}</p>
-                    <div class="modal-action">
-                        <label @click="lastDate()" for="my-modal" class="btn">Get new cronjob</label>
-                        <label @click="nextDates()" for="my-modal" class="btn">Get next cronjobs</label>
-                        <label for="my-modal" class="btn">Ok</label>
-                    </div>
-                </div>
-            </div>
             <div class="flex flex-col p-3">
                 <h1 class="text-4xl font-bold">Wexthuset</h1>
                 <div>
@@ -58,10 +82,23 @@ const nextDates = () => {
                     <div class="card w-full bg-base-200 shadow-xl mt-3">
                         <div class="card-body">
                             <h2 class="card-title">Bevattning</h2>
-                            <p>Växthuset kommer vattnas om {{ wateringTime }} minuter</p>
-                        </div>
-                        <div class="card-actions justify-end">
-                            <label for="my-modal" class="btn modal-button">open modal</label>
+                            <div class="input-group">
+                                <span>Var</span>
+                                <input id="time" v-model="userTime" type="text" placeholder="10"
+                                    class="input input-bordered" />
+                                <span>:e</span>
+                                <select id="interval" v-model="userInterval" class="select select-bordered">
+                                    <option v-for="f in frequencies" v-bind:value="f">
+                                        {{f}}
+                                    </option>
+                                </select>
+                                <button @click="cronTime = generateCronTime(userTime, userInterval)"
+                                    class="btn">Go</button>
+                            </div>
+                            <p>{{cronTime}}</p>
+                            <button @click="logNextDates" class="btn">Get next dates</button>
+                            <button @click="parseCronTime" class="btn">Crontime parser</button>
+                            <button @click="callApi" class="btn">Get api</button>
                         </div>
                     </div>
                     <div class="card w-full bg-base-200 shadow-xl mt-3">
