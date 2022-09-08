@@ -18,6 +18,8 @@ const cronTimeParser = (ct) => {
     }
 }
 
+const dataIsLoaded = ref(false)
+const latestdata = ref(null)
 const fanSpeed = ref(50)
 const frequencies = ['minut', 'timme', 'dag']
 const cronTime = ref("0 */2 * * * *")
@@ -59,6 +61,9 @@ const callApi = async () => {
      try {
         const resp = await axios.get('https://api.simsva.se/wexteras/data?id=1');
         console.log(resp.data);
+        latestdata.value = (resp.data).pop()
+        dataIsLoaded.value = true
+        // console.log(latestdata.temp,'hej')
     } catch (err) {
         // Handle Error Here
         console.error(err);
@@ -115,8 +120,8 @@ onMounted(() => {
                             <h2 class="card-title">Mätvärden</h2>
                             <p>If a dog chews shoes whose shoes does he choose?</p>
                             <div class="flex">
-                                <div class="radial-progress text-sky-600" style="--value:70;">70%</div>
-                                <div class="radial-progress text-fuchsia-700" style="--value:70;">70%</div>
+                                <div class="radial-progress text-sky-600" style="--value:70;" v-if="dataIsLoaded">{{ latestdata.temp }}</div>
+                                <div class="radial-progress text-fuchsia-700" style="--value:70;" v-if="dataIsLoaded">{{ latestdata.humidity }}</div>
                             </div>
                         </div>
                     </div>
