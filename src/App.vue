@@ -1,9 +1,7 @@
 <script setup>
-import { ref, onMounted } from 'vue';
-import { CronJob } from 'cron'
- import axios from 'axios'
- import {dayjs} from 'dayjs'
- import {relativeTime} from 'dayjs/plugin/relativeTime'
+import { ref } from 'vue';
+import { CronJob, CronTime } from 'cron'
+import axios from 'axios'
 
 const cronTimeParser = (ct) => {
     const intervalDictionary = { 1: "minut", 2: "timme", 3: "dag" }
@@ -44,19 +42,24 @@ const generateCronTime = (time, interval) => {
     }
 }
 
+const setCronTime = () => {
+    cronTime.value = generateCronTime(userTime.value, userInterval.value)
+    const newCronTime = new CronTime(cronTime.value)
+    job.setTime(newCronTime)
+}
+
 const parseCronTime = () => {
     console.log(cronTimeParser(cronTime.value))
 }
 
 const logNextDates = () => {
     console.log(job.nextDates().c)
-    const { year, month, day, hour, minute,second } = job.nextDates().c
-     dayjs.extend(relativeTime)
-    print(dayjs(year, month, day, hour, minute, second).fromNow())
+    // const { year, month, day, hour, minute,second } = job.nextDates().c
+    // print(dayjs(year, month, day, hour, minute, second).fromNow())
 }
 
 const callApi = async () => {
-     try {
+    try {
         const resp = await axios.get('https://api.simsva.se/wexteras/data?id=1');
         console.log(resp.data);
     } catch (err) {
@@ -64,9 +67,9 @@ const callApi = async () => {
         console.error(err);
     }
 }
-onMounted(() => {
-    dayjs.extend(relativeTime)
- })
+ // onMounted(() => {
+ //     dayjs.extend(relativeTime)
+ //  })
 
 </script>
 
@@ -76,12 +79,12 @@ onMounted(() => {
             <input type="checkbox" id="my-modal" class="modal-toggle" />
             <div class="flex flex-col p-3">
                 <h1 class="text-4xl font-bold">Wexthuset</h1>
-                <div>
-                </div>
                 <div class="flex flex-col">
                     <div class="card w-full bg-base-200 shadow-xl mt-3">
                         <div class="card-body">
                             <h2 class="card-title">Bevattning</h2>
+                            <p>{{userTime}}</p>
+                            <p>{{userInterval}}</p>
                             <div class="input-group">
                                 <span>Var</span>
                                 <input id="time" v-model="userTime" type="text" placeholder="10"
@@ -92,8 +95,7 @@ onMounted(() => {
                                         {{f}}
                                     </option>
                                 </select>
-                                <button @click="cronTime = generateCronTime(userTime, userInterval)"
-                                    class="btn">Go</button>
+                                <button @click="setCronTime" class="btn">Go</button>
                             </div>
                             <p>{{cronTime}}</p>
                             <button @click="logNextDates" class="btn">Get next dates</button>
