@@ -70,7 +70,7 @@ const callApi = async () => {
     }
 }
 onMounted(() => {
-    dayjs.extend(relativeTime)
+     callApi()
  })
 
 </script>
@@ -103,7 +103,6 @@ onMounted(() => {
                             <p>{{cronTime}}</p>
                             <button @click="logNextDates" class="btn">Get next dates</button>
                             <button @click="parseCronTime" class="btn">Crontime parser</button>
-                            <button @click="callApi" class="btn">Get api</button>
                         </div>
                     </div>
                     <div class="card w-full bg-base-200 shadow-xl mt-3">
