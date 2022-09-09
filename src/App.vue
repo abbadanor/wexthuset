@@ -118,10 +118,10 @@ onMounted(() => {
                     <div class="card w-full bg-base-200 shadow-xl mt-3">
                         <div class="card-body">
                             <h2 class="card-title">Mätvärden</h2>
-                            <p>If a dog chews shoes whose shoes does he choose?</p>
+                            <p>Temperature / Humidity</p>
                             <div class="flex">
-                                <div class="radial-progress text-sky-600" style="--value:70;" v-if="dataIsLoaded">{{ latestdata.temp }}</div>
-                                <div class="radial-progress text-fuchsia-700" style="--value:70;" v-if="dataIsLoaded">{{ latestdata.humidity }}</div>
+                                <div class="radial-progress text-sky-600" style="--value:100;" v-if="dataIsLoaded">{{ latestdata.temp }}°</div>
+                                <div class="radial-progress text-fuchsia-700" style="--value:100; margin-left:10px;" v-if="dataIsLoaded">{{ latestdata.humidity }}%</div>
                             </div>
                         </div>
                     </div>
