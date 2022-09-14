@@ -1,5 +1,12 @@
+<script setup>
+import Footer from './components/Footer.vue'
+import Header from './components/Header.vue'
+</script>
+
 <template>
-    <div class="min-h-screen w-full">
+    <Header></Header>
+    <div class="w-full">
         <router-view></router-view>
     </div>
+    <Footer></Footer>
 </template>
