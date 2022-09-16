@@ -4,9 +4,9 @@ import Header from './components/Header.vue'
 </script>
 
 <template>
-    <Header></Header>
-    <div class="w-full">
+    <div class="min-h-screen relative overflow-hidden pb-16">
+        <Header></Header>
         <router-view></router-view>
+        <Footer></Footer>
     </div>
-    <Footer></Footer>
 </template>

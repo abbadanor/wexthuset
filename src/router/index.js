@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from "vue-router";
 import Index from '../views/Index.vue'
 import Measurements from '../views/Measurements.vue'
+import Configure from '../views/Configure.vue'
 
 const routes = [
     {
@@ -10,6 +11,10 @@ const routes = [
     {
         path: '/measurements',
         component: Measurements
+    },
+    {
+        path: '/configure',
+        component: Configure
     },
 ]
 
