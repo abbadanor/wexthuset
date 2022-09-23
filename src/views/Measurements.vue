@@ -4,14 +4,15 @@
             <div class="flex flex-col">
                 <div class="card w-full bg-base-200 shadow-xl mt-3">
                     <div class="card-body">
-                      <div class="flex justify-between">
-                        <h2 class="card-title">Temperatur</h2>
-                        <div class="flex items-center">
-                          <button @click="getTemperatureFromDatabase" class="btn ml-2 btn-circle">
-                            <ArrowPathIcon class="inline-block w-5 h-5 stroke-current cursor-pointer"></ArrowPathIcon>
-                          </button>
+                        <div class="flex justify-between">
+                            <h2 class="card-title">Temperatur</h2>
+                            <div class="flex items-center">
+                                <button @click="testDebounce" class="btn ml-2 btn-circle">
+                                    <ArrowPathIcon class="inline-block w-5 h-5 stroke-current cursor-pointer">
+                                    </ArrowPathIcon>
+                                </button>
+                            </div>
                         </div>
-                      </div>
                         <apexchart class="w-full" height=300 type="area" :options="temperatureChartOptions"
                             :series="temperatureSeries">
                         </apexchart>
@@ -27,7 +28,8 @@
 </template>
 
 <script setup>
-import {onMounted, ref, reactive} from 'vue'
+import debounce from 'lodash.debounce'
+import { onMounted, ref, reactive } from 'vue'
 import axios from 'axios'
 import { ArrowPathIcon } from "@heroicons/vue/24/solid";
 
@@ -44,7 +46,7 @@ const humiditySeries = ref([{
 }])
 
 
- const getTemperatureFromDatabase = async () => {
+const getTemperatureFromDatabase = async () => {
     try {
         const res = await axios.get('https://api.simsva.se/wexteras/data', { params: { id: 1, limit: limit } })
         const tempArray = res.data.map((i) => i.temp)
@@ -53,8 +55,8 @@ const humiditySeries = ref([{
 
         temperatureSeries.value[0].data = tempArray
         humiditySeries.value[0].data = humidArray
-        updateChart({xaxis: {categories: timeArray}}, temperatureChartOptions)
-      updateChart({xaxis: {categories: timeArray}}, humidityChartOptions)
+        updateChart({ xaxis: { categories: timeArray } }, temperatureChartOptions)
+        updateChart({ xaxis: { categories: timeArray } }, humidityChartOptions)
     } catch (err) {
         console.error(err);
     }
@@ -62,8 +64,12 @@ const humiditySeries = ref([{
 
 // ok lite jobbigt
 function updateChart(option, chart) {
-   chart.value = {...chart.value, ...option}
- }
+    chart.value = { ...chart.value, ...option }
+}
+
+const testDebounce = debounce(() => {
+    console.log('hej')
+}, 1000)
 
 const chartOptions = {
     chart: {
@@ -75,16 +81,16 @@ const chartOptions = {
                 false
         }
     },
-   xaxis: {
-     type: 'datetime',
-     categories: []
-   },
-   tooltip: {
-     x: {
-       format: 'dd/MM/yy HH:mm'
-     },
-   },
-   grid: {
+    xaxis: {
+        type: 'datetime',
+        categories: []
+    },
+    tooltip: {
+        x: {
+            format: 'dd/MM/yy HH:mm'
+        },
+    },
+    grid: {
         show: true,
         borderColor: 'rgba(255,255,255,0.1)',
         strokeDashArray: 0,
@@ -111,11 +117,11 @@ const chartOptions = {
     }
 }
 
-const temperatureChartOptions = ref({...chartOptions})
-const humidityChartOptions = ref({...chartOptions})
+const temperatureChartOptions = ref({ ...chartOptions })
+const humidityChartOptions = ref({ ...chartOptions })
 
 onMounted(() => {
-   getTemperatureFromDatabase()
- })
+    getTemperatureFromDatabase()
+})
 
 </script>
