@@ -83,20 +83,20 @@ onMounted(() => {
       </div>
     </div>
     <div class="navbar-center">
-      <router-link to="/" class="btn btn-ghost normal-case text-xl">Wexthüset</router-link>
+      <router-link to="/" class="btn btn-ghost normal-case text-xl hidden sm:flex">Wexthüset</router-link>
     </div>
     <div class="navbar-end">
       <div class="form-control">
         <label class="label">
           <div
-            class="leading-3 tooltip tooltip-bottom"
+            class="leading-3 tooltip tooltip-bottom hidden sm:block"
             data-tip="Manuellt läge låter dig styra växthuset"
           >
             <QuestionMarkCircleIcon class="inline-block w-5 h-5 stroke-current mr-2 cursor-pointer"></QuestionMarkCircleIcon>
           </div>
           <span
             v-if="store.manualMode !== null"
-            class="label-text"
+            class="label-text whitespace-nowrap"
           >{{store.manualMode ? "Manuellt läge" : "Automatiskt läge"}}</span>
           <input
             :indeterminate="userManualMode === null"

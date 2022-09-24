@@ -175,12 +175,12 @@ onMounted(() => {
         <div class="card w-full bg-base-200 shadow-xl mt-3">
           <div class="card-body">
             <h2 class="card-title">Mätvärden</h2>
-            <div class="block stats shadow sm:flex">
+            <div class="block stats shadow md:flex">
               <div
                 @click="router.push('/measurements')"
                 class="stat cursor-pointer hover:bg-base-300"
               >
-                <div class="stat-figure text-secondary">
+                <div class="stat-figure text-primary">
                   <GlobeEuropeAfricaIcon class="inline-block w-8 h-8 stroke-current"></GlobeEuropeAfricaIcon>
                 </div>
                 <div class="stat-title">Temperatur</div>
@@ -189,9 +189,9 @@ onMounted(() => {
               </div>
               <div
                 @click="router.push('/measurements')"
-                class="stat mt-3 sm:mt-0 cursor-pointer hover:bg-base-300"
+                class="stat mt-3 md:mt-0 cursor-pointer hover:bg-base-300"
               >
-                <div class="stat-figure text-secondary">
+                <div class="stat-figure text-primary">
                   <CloudIcon class="inline-block w-8 h-8 stroke-current"></CloudIcon>
                 </div>
                 <div class="stat-title">Luftfuktighet</div>
@@ -212,17 +212,17 @@ onMounted(() => {
                 :disabled="!store.manualMode"
               />
             </div>
-            <div class="block stats shadow sm:flex">
+            <div class="block stats shadow md:flex">
               <div @click="router.push('/measurements')" class="stat">
-                <div class="stat-figure text-secondary">
+                <div class="stat-figure text-primary">
                   <RocketLaunchIcon class="inline-block w-8 h-8 stroke-current"></RocketLaunchIcon>
                 </div>
                 <div class="stat-title">Hastighet</div>
                 <div class="stat-value">{{Math.floor(settings.rpm * 1.369)}} RPM</div>
                 <div class="stat-desc">Faktiskt värde på frekvensen</div>
               </div>
-              <div @click="router.push('/measurements')" class="stat mt-3 sm:mt-0">
-                <div class="stat-figure text-secondary">
+              <div @click="router.push('/measurements')" class="stat mt-3 md:mt-0">
+                <div class="stat-figure text-primary">
                   <BoltIcon class="inline-block w-8 h-8 stroke-current"></BoltIcon>
                 </div>
                 <div class="stat-title">Status</div>
@@ -232,7 +232,7 @@ onMounted(() => {
                 >{{fanEnabled ? 'Stäng av' : 'Sätt på'}} fläkten med switchen ovan</div>
               </div>
             </div>
-            <p v-if="!store.manualMode" class="text-secondary">
+            <p v-if="!store.manualMode" class="text-primary">
               <QuestionMarkCircleIcon class="inline-block w-5 h-5 stroke-current cursor-pointer"></QuestionMarkCircleIcon>Växla till manuellt läge för att styra fläkten
             </p>
             <div v-if="store.manualMode && fanEnabled" class="flex">
@@ -254,7 +254,7 @@ onMounted(() => {
             </div>
             <div class="block stats shadow sm:flex">
               <div class="stat">
-                <div class="stat-figure text-secondary">
+                <div class="stat-figure text-primary">
                   <FunnelIcon class="inline-block w-8 h-8 stroke-current"></FunnelIcon>
                 </div>
                 <div class="stat-title">Luftflöde</div>
@@ -262,7 +262,7 @@ onMounted(() => {
                 <div class="stat-desc">Faktiskt värde på hur öppen luckan är</div>
               </div>
               <div class="stat mt-3 sm:mt-0">
-                <div class="stat-figure text-secondary">
+                <div class="stat-figure text-primary">
                   <BoltIcon class="inline-block w-8 h-8 stroke-current"></BoltIcon>
                 </div>
                 <div class="stat-title">Status</div>
@@ -271,7 +271,7 @@ onMounted(() => {
               </div>
             </div>
 
-            <p v-if="!store.manualMode" class="text-secondary">
+            <p v-if="!store.manualMode" class="text-primary">
               <QuestionMarkCircleIcon class="inline-block w-5 h-5 stroke-current cursor-pointer"></QuestionMarkCircleIcon>Växla till manuellt läge för att styra luckan
             </p>
             <div v-if="store.manualMode && doorOpen" class="flex">
