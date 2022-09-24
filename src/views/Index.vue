@@ -10,10 +10,11 @@ import {
 } from "@heroicons/vue/24/solid";
 import { ref, reactive, onMounted, watch, computed } from "vue";
 import { useStore } from "../store";
-import router from "../router"
+import router from "../router";
 import axios from "axios";
 import debounce from "lodash.debounce";
 const store = useStore();
+const debug = false;
 
 const data = reactive({
   temperature: null,
@@ -30,6 +31,11 @@ const userSettings = reactive({
   door: null,
 });
 
+const memorySettings = reactive({
+  rpm: null,
+  door: null,
+});
+
 const fanEnabled = ref(null);
 const doorOpen = ref(null);
 
@@ -37,11 +43,11 @@ const userSettingsComputed = computed(() => Object.assign({}, userSettings));
 
 const getDataValues = async () => {
   try {
-    const resp = await axios.get("https://api.simsva.se/wexteras/data", {
+    const res = await axios.get("https://api.simsva.se/wexteras/data", {
       params: { id: 1, limit: 1 },
     });
-    data.temperature = resp.data[0].temp;
-    data.humidity = resp.data[0].humidity;
+    data.temperature = res.data[0].temp;
+    data.humidity = res.data[0].humidity;
   } catch (err) {
     console.error(err);
   }
@@ -52,9 +58,11 @@ const getSettingValues = async () => {
     const res = await axios.get("https://api.simsva.se/wexteras/settings", {
       params: { id: 1 },
     });
+    console.log("request successful");
     const apiSettings = { rpm: res.data.rpm, door: res.data.door };
-    Object.assign(userSettings, apiSettings);
     Object.assign(settings, apiSettings);
+    Object.assign(userSettings, apiSettings);
+    Object.assign(memorySettings, apiSettings);
     if (res.data.rpm === 0) {
       fanEnabled.value = false;
     } else {
@@ -69,7 +77,7 @@ const getSettingValues = async () => {
     console.error(err);
   }
 };
-const patchSettings = async (body) => {
+const patchSettings = async (body, assign = true) => {
   try {
     const res = await axios.patch(
       "https://api.simsva.se/wexteras/settings",
@@ -86,6 +94,19 @@ const patchSettings = async (body) => {
       case 200:
         console.log("Successful request");
         Object.assign(settings, body);
+        if (Number(body.rpm) === 0) {
+          fanEnabled.value = false;
+        } else {
+          fanEnabled.value = true;
+        }
+        if (Number(body.door) === 0) {
+          doorOpen.value = false;
+        } else {
+          doorOpen.value = true;
+        }
+        if (assign) {
+          Object.assign(memorySettings, body);
+        }
         break;
       default:
         console.error("Unknown error, status: " + res.status);
@@ -99,13 +120,33 @@ watch(userSettingsComputed, (newValue, oldValue) => {
   debounceInput(newValue, oldValue);
 });
 
-watch(fanEnabled, (value) => {
-  if(value) {
-    patchSettings({rpm: settings.rpm})
+watch(fanEnabled, (newValue, oldValue) => {
+  if (newValue == null || oldValue == null) return;
+  if (newValue) {
+    if (memorySettings.rpm === 0) {
+      patchSettings({ rpm: 1023 }, false);
+      userSettings.rpm = 1023;
+    } else {
+      patchSettings({ rpm: memorySettings.rpm }, false);
+    }
   } else {
-    patchSettings({rpm: 0})
+    patchSettings({ rpm: 0 }, false);
   }
-})
+});
+
+watch(doorOpen, (newValue, oldValue) => {
+  if (newValue == null || oldValue == null) return;
+  if (newValue) {
+    if (memorySettings.door === 0) {
+      patchSettings({ door: 180 }, false);
+      userSettings.door = 180;
+    } else {
+      patchSettings({ door: memorySettings.door }, false);
+    }
+  } else {
+    patchSettings({ door: 0 }, false);
+  }
+});
 
 const debounceInput = debounce((newValue, oldValue) => {
   if (
@@ -119,6 +160,11 @@ const debounceInput = debounce((newValue, oldValue) => {
 onMounted(() => {
   getDataValues();
   getSettingValues();
+  window.setInterval(() => {
+    if (store.manualMode) {
+      getSettingValues();
+    }
+  }, 30 * 1000);
 });
 </script>
 
@@ -181,13 +227,15 @@ onMounted(() => {
                 </div>
                 <div class="stat-title">Status</div>
                 <div class="stat-value">{{fanEnabled ? 'PÅ' : 'AV'}}</div>
-                <div class="stat-desc">Stäng av fläkten med switchen ovan</div>
+                <div
+                  class="stat-desc"
+                >{{fanEnabled ? 'Stäng av' : 'Sätt på'}} fläkten med switchen ovan</div>
               </div>
             </div>
             <p v-if="!store.manualMode" class="text-secondary">
               <QuestionMarkCircleIcon class="inline-block w-5 h-5 stroke-current cursor-pointer"></QuestionMarkCircleIcon>Växla till manuellt läge för att styra fläkten
             </p>
-            <div v-if="store.manualMode" class="flex">
+            <div v-if="store.manualMode && fanEnabled" class="flex">
               <span class="font-bold mr-4 whitespace-nowrap">Styr fläkten</span>
               <input type="range" v-model="userSettings.rpm" min="0" max="1023" class="range" />
             </div>
@@ -218,17 +266,32 @@ onMounted(() => {
                   <BoltIcon class="inline-block w-8 h-8 stroke-current"></BoltIcon>
                 </div>
                 <div class="stat-title">Status</div>
-                <div class="stat-value">ÖPPEN</div>
+                <div class="stat-value">{{doorOpen ? 'ÖPPEN' : 'STÄNGD'}}</div>
+                <div class="stat-desc">{{fanEnabled ? 'Stäng' : 'Öppna'}} luckan med switchen ovan</div>
               </div>
             </div>
 
             <p v-if="!store.manualMode" class="text-secondary">
               <QuestionMarkCircleIcon class="inline-block w-5 h-5 stroke-current cursor-pointer"></QuestionMarkCircleIcon>Växla till manuellt läge för att styra luckan
             </p>
-            <div v-if="store.manualMode" class="flex">
+            <div v-if="store.manualMode && doorOpen" class="flex">
               <span class="font-bold mr-4 whitespace-nowrap">Styr luckan</span>
               <input type="range" v-model="userSettings.door" min="0" max="180" class="range" />
             </div>
+          </div>
+        </div>
+        <div v-if="debug" class="card w-full bg-base-200 shadow-xl mt-3">
+          <div class="card-body">
+            <h2 class="card-title">Debug</h2>
+            <h4 class="text-xl font-bold">settings</h4>
+            <p>RPM: {{settings.rpm}}</p>
+            <p>door: {{settings.door}}</p>
+            <h4 class="text-xl font-bold">userSettings</h4>
+            <p>RPM: {{userSettings.rpm}}</p>
+            <p>door: {{userSettings.door}}</p>
+            <h4 class="text-xl font-bold">memorySettings</h4>
+            <p>RPM: {{memorySettings.rpm}}</p>
+            <p>door: {{memorySettings.door}}</p>
           </div>
         </div>
       </div>
