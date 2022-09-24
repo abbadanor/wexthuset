@@ -28,7 +28,6 @@
 </template>
 
 <script setup>
-import debounce from 'lodash.debounce'
 import { onMounted, ref, reactive } from 'vue'
 import axios from 'axios'
 import { ArrowPathIcon } from "@heroicons/vue/24/solid";
@@ -66,10 +65,6 @@ const getTemperatureFromDatabase = async () => {
 function updateChart(option, chart) {
     chart.value = { ...chart.value, ...option }
 }
-
-const testDebounce = debounce(() => {
-    console.log('hej')
-}, 1000)
 
 const chartOptions = {
     chart: {

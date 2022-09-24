@@ -10,6 +10,7 @@ import {
 } from "@heroicons/vue/24/solid";
 import { ref, reactive, onMounted, watch, computed } from "vue";
 import { useStore } from "../store";
+import router from "../router"
 import axios from "axios";
 import debounce from "lodash.debounce";
 const store = useStore();
