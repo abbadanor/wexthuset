@@ -7,7 +7,7 @@
                         <div class="flex justify-between">
                             <h2 class="card-title">Temperatur</h2>
                             <div class="flex items-center">
-                                <button @click="testDebounce" class="btn ml-2 btn-circle">
+                                <button @click="getTemperatureFromDatabase" class="btn ml-2 btn-circle">
                                     <ArrowPathIcon class="inline-block w-5 h-5 stroke-current cursor-pointer">
                                     </ArrowPathIcon>
                                 </button>

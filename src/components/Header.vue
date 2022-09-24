@@ -1,7 +1,8 @@
 <script setup>
 import { useStore } from "../store";
-import { QuestionMarkCircleIcon } from "@heroicons/vue/24/solid";
+import { QuestionMarkCircleIcon, ChevronDownIcon } from "@heroicons/vue/24/solid";
 import { ref, onMounted, watch } from "vue";
+import ThemeButton from "../components/ThemeButton.vue"
 import axios from "axios";
 import debounce from "lodash.debounce";
 const store = useStore();
@@ -20,7 +21,7 @@ const getManualMode = async () => {
 };
 
 const patchManualMode = async (value) => {
-  store.manualMode = null
+  store.manualMode = null;
   try {
     const res = await axios.patch(
       "https://api.simsva.se/wexteras/settings",
@@ -36,7 +37,7 @@ const patchManualMode = async (value) => {
         break;
       case 200:
         console.log("Successful request");
-        store.manualMode = value
+        store.manualMode = value;
         break;
       default:
         console.error("Unknown error, status: " + res.status);
@@ -62,10 +63,29 @@ onMounted(() => {
 
 <template>
   <div class="navbar bg-base-100">
-    <div class="flex-1">
+    <div class="navbar-start">
+      <div class="dropdown">
+        <label tabindex="0" class="btn gap-2 btn-ghost">
+          Tema
+          <ChevronDownIcon class="inline-block w-6 h-6 stroke-current"></ChevronDownIcon>
+        </label>
+        <div tabindex="0" class="dropdown-content menu shadow min-w-max">
+          <ThemeButton theme="dark" position="first"></ThemeButton>
+          <ThemeButton theme="light"></ThemeButton>
+          <ThemeButton theme="corporate"></ThemeButton>
+          <ThemeButton theme="retro"></ThemeButton>
+          <ThemeButton theme="valentine"></ThemeButton>
+          <ThemeButton theme="lofi"></ThemeButton>
+          <ThemeButton theme="black"></ThemeButton>
+          <ThemeButton theme="dracula"></ThemeButton>
+          <ThemeButton theme="night" position="last"></ThemeButton>
+        </div>
+      </div>
+    </div>
+    <div class="navbar-center">
       <router-link to="/" class="btn btn-ghost normal-case text-xl">Wexthüset</router-link>
     </div>
-    <div class>
+    <div class="navbar-end">
       <div class="form-control">
         <label class="label">
           <div
@@ -74,7 +94,10 @@ onMounted(() => {
           >
             <QuestionMarkCircleIcon class="inline-block w-5 h-5 stroke-current mr-2 cursor-pointer"></QuestionMarkCircleIcon>
           </div>
-          <span v-if="store.manualMode !== null" class="label-text">{{store.manualMode ? "Manuellt läge" : "Automatiskt läge"}}</span>
+          <span
+            v-if="store.manualMode !== null"
+            class="label-text"
+          >{{store.manualMode ? "Manuellt läge" : "Automatiskt läge"}}</span>
           <input
             :indeterminate="userManualMode === null"
             v-model="userManualMode"
