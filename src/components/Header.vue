@@ -69,7 +69,7 @@ onMounted(() => {
           Tema
           <ChevronDownIcon class="inline-block w-6 h-6 stroke-current"></ChevronDownIcon>
         </label>
-        <div tabindex="0" class="dropdown-content menu shadow min-w-max">
+        <div tabindex="0" class="dropdown-content menu p-2 bg-base-100 rounded-3xl shadow-2xl min-w-max">
           <ThemeButton theme="dark" position="first"></ThemeButton>
           <ThemeButton theme="light"></ThemeButton>
           <ThemeButton theme="corporate"></ThemeButton>
