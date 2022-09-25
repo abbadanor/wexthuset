@@ -160,6 +160,13 @@ const debounceInput = debounce((newValue, oldValue) => {
 onMounted(() => {
   getDataValues();
   getSettingValues();
+
+  window.setInterval(() => {
+    if (store.manualMode) {
+      getDataValues();
+    }
+  }, 10 * 1000);
+
   window.setInterval(() => {
     if (store.manualMode) {
       getSettingValues();
@@ -233,7 +240,7 @@ onMounted(() => {
               </div>
             </div>
             <p v-if="!store.manualMode" class="text-primary">
-              <QuestionMarkCircleIcon class="inline-block w-5 h-5 stroke-current cursor-pointer"></QuestionMarkCircleIcon>Växla till manuellt läge för att styra fläkten
+              <QuestionMarkCircleIcon class="inline-block w-5 h-5 stroke-current"></QuestionMarkCircleIcon>Växla till manuellt läge för att styra fläkten
             </p>
             <div v-if="store.manualMode && fanEnabled" class="flex">
               <span class="font-bold mr-4 whitespace-nowrap">Styr fläkten</span>
@@ -272,12 +279,22 @@ onMounted(() => {
             </div>
 
             <p v-if="!store.manualMode" class="text-primary">
-              <QuestionMarkCircleIcon class="inline-block w-5 h-5 stroke-current cursor-pointer"></QuestionMarkCircleIcon>Växla till manuellt läge för att styra luckan
+              <QuestionMarkCircleIcon class="inline-block w-5 h-5 stroke-current"></QuestionMarkCircleIcon>Växla till manuellt läge för att styra luckan
             </p>
             <div v-if="store.manualMode && doorOpen" class="flex">
               <span class="font-bold mr-4 whitespace-nowrap">Styr luckan</span>
               <input type="range" v-model="userSettings.door" min="0" max="180" class="range" />
             </div>
+          </div>
+        </div>
+        <div class="card w-full bg-base-200 shadow-xl mt-3">
+          <div v-if="store.manualMode" class="card-body">
+            <h2 class="card-title">Bevattning</h2>
+            <button class="btn">Vattna</button>
+          </div>
+          <div v-else class="card-body">
+            <h2 class="card-title">Bevattning</h2>
+            <p>Växthuset vattnas varje timme</p>
           </div>
         </div>
         <div v-if="debug" class="card w-full bg-base-200 shadow-xl mt-3">
