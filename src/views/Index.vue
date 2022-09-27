@@ -6,7 +6,6 @@ import {
   BoltIcon,
   QuestionMarkCircleIcon,
   FunnelIcon,
-  ClockIcon,
 } from "@heroicons/vue/24/solid";
 import { ref, reactive, onMounted, watch, computed } from "vue";
 import { useStore } from "../store";
@@ -24,11 +23,13 @@ const data = reactive({
 const settings = reactive({
   rpm: null,
   door: null,
+  water: null,
 });
 
 const userSettings = reactive({
   rpm: null,
   door: null,
+  water: null,
 });
 
 const memorySettings = reactive({
@@ -59,7 +60,11 @@ const getSettingValues = async () => {
       params: { id: 1 },
     });
     console.log("request successful");
-    const apiSettings = { rpm: res.data.rpm, door: res.data.door };
+    const apiSettings = {
+      rpm: res.data.rpm,
+      door: res.data.door,
+      water: res.data.water,
+    };
     Object.assign(settings, apiSettings);
     Object.assign(userSettings, apiSettings);
     Object.assign(memorySettings, apiSettings);
@@ -77,6 +82,7 @@ const getSettingValues = async () => {
     console.error(err);
   }
 };
+
 const patchSettings = async (body, assign = true) => {
   try {
     const res = await axios.patch(
@@ -107,6 +113,31 @@ const patchSettings = async (body, assign = true) => {
         if (assign) {
           Object.assign(memorySettings, body);
         }
+        break;
+      default:
+        console.error("Unknown error, status: " + res.status);
+    }
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+const patchWater = async () => {
+  try {
+    const res = await axios.patch(
+      "https://api.simsva.se/wexteras/settings",
+      { water: userSettings.water },
+      { params: { id: 1 } }
+    );
+    switch (res.status) {
+      case 400:
+        console.error("Bad request");
+        break;
+      case 404:
+        console.error("Non-existant parameter");
+        break;
+      case 200:
+        console.log("Successful request");
         break;
       default:
         console.error("Unknown error, status: " + res.status);
@@ -157,6 +188,8 @@ const debounceInput = debounce((newValue, oldValue) => {
   patchSettings(newValue);
 }, 250);
 
+const isPositiveInt = (str) => Number.isInteger(Number(str)) && Number(str) > 0;
+
 onMounted(() => {
   getDataValues();
   getSettingValues();
@@ -165,7 +198,7 @@ onMounted(() => {
     if (store.manualMode) {
       getDataValues();
     }
-  }, 10 * 1000);
+  }, 2 * 1000);
 
   window.setInterval(() => {
     if (store.manualMode) {
@@ -288,13 +321,28 @@ onMounted(() => {
           </div>
         </div>
         <div class="card w-full bg-base-200 shadow-xl mt-3">
-          <div v-if="store.manualMode" class="card-body">
+          <div class="card-body">
             <h2 class="card-title">Bevattning</h2>
-            <button class="btn">Vattna</button>
-          </div>
-          <div v-else class="card-body">
-            <h2 class="card-title">Bevattning</h2>
-            <p>Växthuset vattnas varje timme</p>
+            <p>Nuvarande bevattningsintervall: {{settings.water}}</p>
+            <h4 class="font-bold text-lg">Ändra bevattningsintervall</h4>
+            <div class="form-control">
+              <label class="label">
+                <span class="label-text">Bevattningsintervall i sekunder</span>
+              </label>
+              <label class="input-group">
+                <input
+                  v-model="userSettings.water"
+                  type="text"
+                  class="input input-bordered"
+                  :class="isPositiveInt(userSettings.water) ? '' : 'input-error'"
+                />
+                <button
+                  @click="patchWater"
+                  class="btn"
+                  :class="isPositiveInt(userSettings.water) ? '' : 'btn-disabled'"
+                >Submit</button>
+              </label>
+            </div>
           </div>
         </div>
         <div v-if="debug" class="card w-full bg-base-200 shadow-xl mt-3">
@@ -303,9 +351,11 @@ onMounted(() => {
             <h4 class="text-xl font-bold">settings</h4>
             <p>RPM: {{settings.rpm}}</p>
             <p>door: {{settings.door}}</p>
+            <p>water: {{settings.water}}</p>
             <h4 class="text-xl font-bold">userSettings</h4>
             <p>RPM: {{userSettings.rpm}}</p>
             <p>door: {{userSettings.door}}</p>
+            <p>water: {{userSettings.water}}</p>
             <h4 class="text-xl font-bold">memorySettings</h4>
             <p>RPM: {{memorySettings.rpm}}</p>
             <p>door: {{memorySettings.door}}</p>

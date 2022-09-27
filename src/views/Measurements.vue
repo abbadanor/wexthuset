@@ -32,7 +32,7 @@ import { onMounted, ref, reactive } from 'vue'
 import axios from 'axios'
 import { ArrowPathIcon } from "@heroicons/vue/24/solid";
 
-const limit = 10
+const limit = 50
 
 const temperatureSeries = ref([{
     name: 'Temperature',
